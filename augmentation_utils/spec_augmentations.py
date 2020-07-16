@@ -19,7 +19,7 @@ class VerticalFlip(SpecAugmentation):
         super().__init__(ratio)
 
     def apply_helper(self, data):
-        return np.flipud(data)
+        return np.flipud(data).copy()
 
 
 class HorizontalFlip(SpecAugmentation):
@@ -27,7 +27,7 @@ class HorizontalFlip(SpecAugmentation):
         super().__init__(ratio)
 
     def apply_helper(self, data):
-        return np.fliplr(data)
+        return np.fliplr(data).copy()
 
 
 class Noise(SpecAugmentation):
@@ -71,7 +71,7 @@ class FractalTimeStretch(SpecAugmentation):
         (h, w) = data.shape
 
         # Compute min and max column size if needed
-        self.min_chunk_size = int(w * 0.01) if self.min_chunk_size is None else self.min_chunk_size
+        self.min_chunk_size = int(w * 0.1) if self.min_chunk_size is None else self.min_chunk_size
         self.max_chunk_size = int(w * 0.1) if self.max_chunk_size is None else self.max_chunk_size
 
         # Split the spectro into many small chunks (random size)
@@ -281,7 +281,7 @@ class FractalFrecDropout(SpecAugmentation):
         mini = data.min()
 
         # Compute min and max column size if needed
-        self.min_chunk_size = int(h * 0.01) if self.min_chunk_size is None else self.min_chunk_size
+        self.min_chunk_size = int(h * 0.1) if self.min_chunk_size is None else self.min_chunk_size
         self.max_chunk_size = int(h * 0.1) if self.max_chunk_size is None else self.max_chunk_size
 
         # Split the spectro into many small chunks (random size)
@@ -307,8 +307,10 @@ class FractalFrecDropout(SpecAugmentation):
         for valid, chunk in zip(valid_mask, chunks):
             if valid:
                 reconstructed_S.append(chunk)
+                
             else:
-                reconstructed_S.append(list(np.ones(chunk.shape) * mini))
+                void = list(np.ones(chunk.shape) * mini)
+                reconstructed_S.append(void)
 
         reconstructed_S = np.concatenate(reconstructed_S, axis=0)
 
