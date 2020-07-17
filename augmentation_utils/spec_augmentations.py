@@ -170,7 +170,7 @@ class FractalFreqStretch(SpecAugmentation):
 
                 stretched_column = Image.Image.resize(
                     chunk,
-                    (w, int(width * rate)),
+                    (w, np.max(int(width * rate), 1)),
                     random_interpolation()
                 )
 
