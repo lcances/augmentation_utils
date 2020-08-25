@@ -65,7 +65,10 @@ class Augmentation:
                 raise RuntimeError("Can't apply spectral augmentation on data of shape size of 3 or more")
             return data
         
-
+    def __copy__(self):
+        newone = type(self)(self.ratio)
+        newone.__dict__.update(self.__dict__)
+        return newone
 
     def apply_helper(self, data):
         raise NotImplementedError("This is an abstract class")
