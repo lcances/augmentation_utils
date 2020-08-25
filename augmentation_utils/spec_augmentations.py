@@ -43,7 +43,24 @@ class Noise(SpecAugmentation):
 
         noise = np.random.uniform(random_min, random_max, size=data.shape)
         noisy_data = data + noise
-        return np.clip(noisy_data, self.mini, self.maxi)
+        noisy_data = np.clip(noisy_data, self.mini, self.maxi)
+        return noisy_data.astype(np.float32)
+    
+    
+class UniformSignNoise(SpecAugmentation):
+    def __init__(self, ratio, epsilon, mini=-80, maxi=0):
+        super().__init__(ratio)
+        self.epsilon = epsilon
+        self.mini = mini
+        self.maxi = maxi
+        
+    def apply_helper(self, data):
+        # generate uniform noise
+        noise = np.random.uniform(-1, 1, size=data.shape)
+        sign = np.sign(noise)
+        
+        perturbed = data + sign * self.epsilon
+        return np.clip(perturbed, self.mini, self.maxi)
 
 
 class FractalTimeStretch(SpecAugmentation):
