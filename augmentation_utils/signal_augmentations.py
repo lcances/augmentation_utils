@@ -115,7 +115,7 @@ class Clip(SignalAugmentation):
         self.range = range
 
     def apply_helper(self, data):
-        return np.clip(data, *range)
+        return np.clip(data, *self.range)
 
 
 if __name__ == '__main__':
