@@ -2,3 +2,5 @@ __pycache__/
 .ipynb_checkpoints/
 .idea/
 __pycache__/
+augmentation_utils.egg-info/
+augmentation_utils/.ipynb_checkpoints/
