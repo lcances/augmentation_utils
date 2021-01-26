@@ -38,8 +38,8 @@ class Noise(SpecAugmentation):
         self.maxi = maxi
 
     def apply_helper(self, data):
-        random_min = self.maxi
-        random_max = - self.snr
+        random_min = self.mini
+        random_max = self.mini + self.snr
 
         noise = np.random.uniform(random_min, random_max, size=data.shape)
         noisy_data = data + noise
