@@ -1,5 +1,7 @@
+import warnings
 import librosa
 import numpy as np
+import torch
 
 from .augmentations import SignalAugmentation
 
@@ -89,7 +91,7 @@ class NoiseRandom(Noise):
         super().__init__(ratio, target_snr)
     
 
-class Occlusion(SignalAugmentation):
+class _Occlusion(SignalAugmentation):
     def __init__(self, ratio, sampling_rate: int = 22050, max_size: float = 1):
         super().__init__(ratio)
         self.max_size = max_size
@@ -107,6 +109,32 @@ class Occlusion(SignalAugmentation):
         cp_data[occlu_pos:occlu_pos + occlu_size] = 0
 
         return cp_data
+
+
+class Occlusion(SignalAugmentation):
+    def __init__(self, ratio: float, sampling_rate: int, max_size: float = 1):
+        """
+        Randomly set a segment of the audio signal to zero.
+
+        Args:
+            ratio (float): chance of applying the augmentation
+            sampling_rate (int): The sampling rate of the file
+            max_size (float): max size of the segment in seconds
+        """
+        super().__init__(ratio)
+        self.sampling_rate = sampling_rate
+        self.max_size = max_size
+        self.max_occlu_size = sampling_rate * max_size
+
+    def forward(self, x):
+        if self.max_occlu_size > len(x):
+            warnings('the max occlusion size is longer than the size of the file.')
+
+        occlu_size = torch.randint(high=self.max_occlu_size, size=(1,))[0]
+        occlu_pos = torch.randint(high=len(x) - occlu_size, size=(1,))[0]
+
+        x[occlu_pos:occlu_pos+occlu_size] = 0
+        return x
 
 
 class Clip(SignalAugmentation):
