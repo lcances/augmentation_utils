@@ -1,8 +1,9 @@
-import torch
+from torch.nn import Module, Sequential
 from typing import Callable
+import random
 
 
-class Augmentation(torch.nn.Module):
+class Augmentation(Module):
     def __init__(self, ratio: float):
         super().__init__()
         assert 0.0 <= ratio <= 1.0
@@ -34,7 +35,9 @@ class ImgAugmentation(Augmentation):
 
 
 class ComposeAugmentation:
-    def __init__(self, pre_process_rule: Callable, post_process_rule: Callable, method='pick_one'):
+    def __init__(self, pre_process_rule: Callable, post_process_rule: Callable, method='pick-one'):
+        super().__init__()
+        self.augmentation_pool = []
         self.pre_process = []
         self.process = []
         self.post_process = []
@@ -47,26 +50,23 @@ class ComposeAugmentation:
     def set_process(self, pool: list) -> None:
         self.process = pool
 
-    def set_preprocess_rule(self, ruler: Callable) -> None:
-        self.pre_process_rule = ruler
-    
-    def set_postprocess_rule(self, ruler: Callable) -> None:
-        self.post_process_rule = ruler
+    def set_augmentation_pool(self, pool: list) -> None:
+        self.augmentation_pool = pool
 
-    def compose(self, augmentation_pool: list) -> nn.Sequential:
+    def __call__(self, x) -> Sequential:
         self.pre_process = []
         self.post_process = []
 
-        if self.method == 'pick_one':
-            return self._compose_pick_one(augmentation_pool)
-        
+        if self.method == 'pick-one':
+            return self._compose_pick_one()(x)
+
         else:
             raise ValueError(f'Methods {self.method} doesn\'t exist.')
 
-    def _compose_pick_one(self, augmentation_pool: list) -> nn.Sequential:
+    def _compose_pick_one(self) -> Sequential:
         """Select only one augmentation randomly."""
-        aug_idx = random.randint(0, len(augmentation_pool) - 1)
-        selected_aug = augmentation_pool[aug_idx]
+        aug_idx = random.randint(0, len(self.augmentation_pool) - 1)
+        selected_aug = self.augmentation_pool[aug_idx]
 
         # check pre-process rule
         if self.pre_process_rule(selected_aug):
@@ -76,10 +76,10 @@ class ComposeAugmentation:
             self.post_process = [selected_aug]
 
         # Compose the new sequential
-        composed = nn.Sequential(
-            nn.Sequential(*self.pre_process),
+        composed = Sequential(
+            Sequential(*self.pre_process),
             self.process,
-            nn.Sequential(*self.post_process),
+            Sequential(*self.post_process),
         )
 
         return composed

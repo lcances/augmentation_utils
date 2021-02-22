@@ -124,14 +124,14 @@ class Occlusion(SignalAugmentation):
         super().__init__(ratio)
         self.sampling_rate = sampling_rate
         self.max_size = max_size
-        self.max_occlu_size = sampling_rate * max_size
+        self.max_occlu_size = int(sampling_rate * max_size)
 
     def forward(self, x):
         if self.max_occlu_size > len(x):
             warnings('the max occlusion size is longer than the size of the file.')
 
         occlu_size = torch.randint(high=self.max_occlu_size, size=(1,))[0]
-        occlu_pos = torch.randint(high=len(x) - occlu_size, size=(1,))[0]
+        occlu_pos = torch.randint(high=int(len(x) - occlu_size), size=(1,))[0]
 
         x[occlu_pos:occlu_pos+occlu_size] = 0
         return x
