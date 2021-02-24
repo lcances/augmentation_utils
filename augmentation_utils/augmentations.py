@@ -12,6 +12,9 @@ class Augmentation(Module):
 
     def forward(self, x):
         return x
+    
+    def should_be_applied(self):
+        return random.random() <= self.ratio
 
     def __copy__(self):
         newone = type(self)(self.ratio)
