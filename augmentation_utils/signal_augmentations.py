@@ -89,7 +89,7 @@ class NoiseRandom(Noise):
     def __init__(self, ratio, range: tuple=(15, 25)):
         target_snr = np.random.randint(*range)
         super().__init__(ratio, target_snr)
-    
+
 
 class _Occlusion(SignalAugmentation):
     def __init__(self, ratio, sampling_rate: int = 22050, max_size: float = 1):
@@ -129,14 +129,15 @@ class Occlusion(SignalAugmentation):
     def forward(self, x):
         if not self.should_be_applied():
             return x
-        
-        if self.max_occlu_size > len(x):
-            warnings.warn('the max occlusion size is longer than the size of the file.')
+
+        max_occlu_size = int(self.sampling_rate * self.max_size)
+        if max_occlu_size >= len(x):
+            max_occlu_size = len(x) // 2
 
         occlu_size = torch.randint(high=self.max_occlu_size, size=(1,))[0]
-        occlu_pos = torch.randint(high=int(len(x) - occlu_size), size=(1,))[0]
-
+        occlu_pos = torch.randint(high=abs(int(len(x) - occlu_size))+1, size=(1,))[0]
         x[occlu_pos:occlu_pos+occlu_size] = 0
+
         return x
 
 

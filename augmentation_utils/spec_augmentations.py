@@ -75,7 +75,7 @@ class SpecAugment(nn.Module):
           freq_stripes_num: int
         """
 
-        super(SpecAugmentation, self).__init__()
+        super().__init__()
 
         self.time_dropper = DropStripes(dim=2, drop_width=time_drop_width, stripes_num=time_stripes_num)
 
